@@ -8,4 +8,13 @@ WORKDIR /env/
 COPY requirements.txt /env/
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY app/ /app/
+
 WORKDIR /app/
+
+ENTRYPOINT [ \
+    "python3", "train_model.py", \
+    "-i", "/app/shared_data/dataset/train.csv", \
+    "-t", "/app/shared_data/dataset/test.csv", \
+    "-o", "/app/models/my_model" \
+]

@@ -52,16 +52,9 @@ def print_metrics(predictions, target):
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "-i", "--input", help="Data for training. Only path to .csv files is currently supported.", type=str
-    )
-    parser.add_argument(
-        "-t", "--test", help="Data for validating. Only path to .csv files is currently supported.", type=str
-    )
-
-    parser.add_argument(
-        "-c", "--config", help="Configuration file for model training", default=None
-    )
+    parser.add_argument("-i", "--input", help="Data for training. Only path to .csv files is currently supported.", type=str)
+    parser.add_argument("-t", "--test", help="Data for validating. Only path to .csv files is currently supported.", type=str)
+    parser.add_argument("-c", "--config", help="Configuration file for model training", default=None)
 
     parser.add_argument("-o", "--output", help="Path to stored model")
 
