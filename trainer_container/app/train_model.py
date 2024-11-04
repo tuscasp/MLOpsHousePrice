@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import json
 
 from category_encoders import TargetEncoder
 from sklearn.pipeline import Pipeline
@@ -43,10 +44,14 @@ def build_model():
     return pipeline
 
 
-def print_metrics(predictions, target):
-    print("RMSE: ", np.sqrt(mean_squared_error(predictions, target)))
-    print("MAPE: ", mean_absolute_percentage_error(predictions, target))
-    print("MAE : ", mean_absolute_error(predictions, target))
+def compute_metrics(predictions, target):
+    ret_dir = {
+        "RMSE" : np.sqrt(mean_squared_error(predictions, target)),
+        "MAPE" : mean_absolute_percentage_error(predictions, target),
+        "MAE" : mean_absolute_error(predictions, target)
+    }
+
+    return ret_dir
 
 
 if __name__=='__main__':
@@ -73,7 +78,10 @@ if __name__=='__main__':
 
     test_predictions = model.predict(X_validation)
 
-    print_metrics(test_predictions, Y_validation.values)
+    metrics = compute_metrics(test_predictions, Y_validation.values)
+
+    with open("/app/shared_data/models/model_metrics.json", "w") as outfile:
+        json.dump(metrics, outfile, indent=4, sort_keys=False)
     
 
 
