@@ -62,6 +62,15 @@ def save_model(model: Pipeline, filepath: Path):
     joblib.dump(model, path_model, compress=True)
 
 
+def is_input_valid(path_train_data, path_test_data, path_output_model):
+    input_ok = \
+        Path(path_train_data).exists() \
+        and Path(path_test_data).exists() \
+        and Path(path_output_model).exists()
+
+    return input_ok
+
+
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
 
@@ -71,27 +80,34 @@ if __name__=='__main__':
 
     args = parser.parse_args()
 
-    target_column = "price"
-    data_loader_train = CsvLoader(args.input, target_column)
-    X_train, Y_train = data_loader_train.load()
-
-    data_loader_validation = CsvLoader(args.test, target_column)
-    X_validation, Y_validation = data_loader_validation.load()
-
-    model = build_model()
-
-    model.fit(X_train, Y_train)
-
-    test_predictions = model.predict(X_validation)
-
-    metrics = compute_metrics(test_predictions, Y_validation.values)
-
     dir_models = Path(args.output)
+    dir_models.mkdir(exist_ok=True, parents=True)
 
     path_results_json = dir_models / "model_metrics.json"
-    with open(path_results_json, "w") as outfile:
-        json.dump(metrics, outfile, indent=4, sort_keys=False)
-    
-    path_model = dir_models / "trained_model.pkl"
-    save_model(model, path_model)
 
+    if (is_input_valid(args.input, args.test, args.output)):
+        target_column = "price"
+        data_loader_train = CsvLoader(args.input, target_column)
+        X_train, Y_train = data_loader_train.load()
+
+        data_loader_validation = CsvLoader(args.test, target_column)
+        X_validation, Y_validation = data_loader_validation.load()
+
+        model = build_model()
+
+        model.fit(X_train, Y_train)
+
+        test_predictions = model.predict(X_validation)
+
+        metrics = compute_metrics(test_predictions, Y_validation.values)
+
+
+        with open(path_results_json, "w") as outfile:
+            json.dump(metrics, outfile, indent=4, sort_keys=False)
+
+        path_model = dir_models / "trained_model.pkl"
+        save_model(model, path_model)
+
+    else:
+        with open(path_results_json, "w") as outfile:
+            json.dump({'Error': 'Invalid input data. Ensure to upload train and test data before training.'}, outfile, indent=4, sort_keys=False)

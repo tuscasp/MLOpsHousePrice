@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
+import shutil
 import docker
 import json
 import joblib
@@ -7,12 +8,41 @@ from pathlib import Path
 
 app = FastAPI()
 
+dir_dataset = Path('/app/shared_data/dataset/')
 dir_models = Path('/app/shared_data/models/')
 
 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.post("/uploadtrain/")
+async def upload_file(file: UploadFile = File(...)):
+    dir_dataset.mkdir(exist_ok=True, parents=True)
+
+    path_dest_file = dir_dataset / 'train.csv'
+    if Path(file.filename).suffix != '.csv':
+        return {"filename": file.filename, "message": "Only .csv files are accepted"}
+
+    with path_dest_file.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {"filename": file.filename, "message": "File uploaded successfully"}
+
+
+@app.post("/uploadtest/")
+async def upload_file(file: UploadFile = File(...)):
+    dir_dataset.mkdir(exist_ok=True, parents=True)
+
+    path_dest_file = dir_dataset / 'test.csv'
+    if Path(file.filename).suffix != '.csv':
+        return {"filename": file.filename, "message": "Only .csv files are accepted"}
+
+    with path_dest_file.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {"filename": file.filename, "message": "File uploaded successfully"}
+
 
 
 @app.get("/train")
@@ -75,7 +105,11 @@ async def predict(
     df.loc[0] = [htype, sector, net_usable_area, net_area, n_rooms, n_bathroom, latitude, longitude]
 
     path_model = dir_models / 'trained_model.pkl'
-    model = joblib.load(path_model)
+
+    try:
+        model = joblib.load(path_model)
+    except FileNotFoundError:
+        return {'Error' : 'Ensure to have a trained model before performing predictions.'}
 
     prediction = model.predict(df)[0]
 
