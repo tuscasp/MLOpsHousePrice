@@ -16,5 +16,5 @@ ENTRYPOINT [ \
     "python3", "train_model.py", \
     "-i", "/app/shared_data/dataset/train.csv", \
     "-t", "/app/shared_data/dataset/test.csv", \
-    "-o", "/app/models/my_model" \
+    "-o", "/app/shared_data/models" \
 ]

@@ -1,6 +1,10 @@
 import argparse
+
 import numpy as np
+
 import json
+import joblib
+from pathlib import Path
 
 from category_encoders import TargetEncoder
 from sklearn.pipeline import Pipeline
@@ -54,14 +58,16 @@ def compute_metrics(predictions, target):
     return ret_dir
 
 
+def save_model(model: Pipeline, filepath: Path):
+    joblib.dump(model, path_model, compress=True)
+
+
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--input", help="Data for training. Only path to .csv files is currently supported.", type=str)
     parser.add_argument("-t", "--test", help="Data for validating. Only path to .csv files is currently supported.", type=str)
-    parser.add_argument("-c", "--config", help="Configuration file for model training", default=None)
-
-    parser.add_argument("-o", "--output", help="Path to stored model")
+    parser.add_argument("-o", "--output", help="Path to model output directory.")
 
     args = parser.parse_args()
 
@@ -80,8 +86,12 @@ if __name__=='__main__':
 
     metrics = compute_metrics(test_predictions, Y_validation.values)
 
-    with open("/app/shared_data/models/model_metrics.json", "w") as outfile:
+    dir_models = Path(args.output)
+
+    path_results_json = dir_models / "model_metrics.json"
+    with open(path_results_json, "w") as outfile:
         json.dump(metrics, outfile, indent=4, sort_keys=False)
     
-
+    path_model = dir_models / "trained_model.pkl"
+    save_model(model, path_model)
 

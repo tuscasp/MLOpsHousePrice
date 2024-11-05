@@ -2,4 +2,9 @@ fastapi[standard]==0.115.4
 uvicorn==0.32.0
 docker==7.1.0
 
+scikit-learn==1.5.1
+category-encoders==2.6.4
+joblib==1.4.2
+pandas==2.2.2
+
 ipykernel # debug and investigation only
