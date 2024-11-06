@@ -7,7 +7,7 @@ mkdir shared_folder
 docker build -t ml-orchestrator:latest orchestrator_container
 docker build -t ml-trainer:latest trainer_container
 
-docker run -d --name ml-orchestrator -p 80:80 -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/shared_data/:/app/shared_data/ ml-orchestrator:latest
+docker run -d --name ml-orchestrator -p 80:80 -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/shared_data/:/app/shared_data/ -e HOST_SHARED_DIR=$(pwd)/shared_data ml-orchestrator:latest
 
 python scripts/upload_dataset.py --train prompt/train.csv --test prompt/test.csv
 ```

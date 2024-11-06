@@ -3,6 +3,7 @@ import shutil
 import docker
 import json
 import joblib
+import os
 import pandas as pd
 from pathlib import Path
 
@@ -72,14 +73,13 @@ async def upload_file(file: UploadFile = File(...)):
 async def trainModel():
     client = docker.from_env()
 
-    # TODO: Find a better way of passing the volume. Maybe creating a dedicated volume,
-    # not binded to the host.
+    path_shared_dir_host = os.getenv('HOST_SHARED_DIR')
 
     name_container = "ml-trainer"
     client.containers.run(
         "ml-trainer:latest",
         name="ml-trainer",
-        volumes=["/home/arthur/Projects/MLOpsTraining/shared_data/:/app/shared_data/"]
+        volumes=[f"{path_shared_dir_host}/:/app/shared_data/"]
     )
 
     container = client.containers.get(name_container)
@@ -117,14 +117,6 @@ async def predict(
         longitude = float(longitude)
     except ValueError:
         return {'Error':'ValueError: some numeric value could not be converted to float'}
-
-    # supported_house_types = ["departamento", "casa"]
-    # if not (htype in supported_house_types):
-    #     return {'Error':'ValueError: unkown property type'}
-
-    # supported_sectors = ["vitacura", "la reina", "lo barnechea", "providencia", "las condes"]
-    # if not (sector in supported_sectors):
-    #     return {'Error':'ValueError: unkown sector'}
 
     # TODO: store columns and supported categorical strings in file during model training
     df = pd.DataFrame(columns=['type', 'sector', 'net_usable_area', 'net_area', 'n_rooms', 'n_bathroom', 'latitude', 'longitude'])
