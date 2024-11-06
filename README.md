@@ -19,15 +19,16 @@ Now that the system is up and running, open a web browser and check out the syst
 You may get a complete documentation by openning `http://localhost/docs`.
 
 
-# Developing
+# Assumptions
 
-``` bash
-docker run -d --name ml-orchestrator -p 80:80 -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/shared_data/:/app/shared_data/ ml-orchestrator:latest
-docker run --name ml-trainer -v $(pwd)/shared_data/:/app/shared_data/ ml-trainer:latest
-```
+* Dataset fits in memory
+* Train dataset is fixed, i.e. once the model is trained it no longer updates
+* There is no need to store multiple models at once
+* Dataset is curated, i.e. no missing values
 
-Attach to a container:
-``` bash
-docker run -d --name trainer_bain ml-trainer:latest /bin/bash -c "sleep infinity"
-docker exec -it trainer_bain /bin/bash
-```
+# Next steps
+
+* Run prediction in a dedicated container
+* Enable models to be updated with continuous stream of data
+* Add support to multiple models and track their relative performance on test dataset
+* Improve training pipeline robustness to missing data
