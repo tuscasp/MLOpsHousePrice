@@ -11,7 +11,7 @@ docker build -t ml-trainer:latest trainer_container
 
 docker run -d --name ml-orchestrator -p 80:80 -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/shared_data/:/app/shared_data/ -e HOST_SHARED_DIR=$(pwd)/shared_data ml-orchestrator:latest
 
-python scripts/upload_dataset.py --train prompt/train.csv --test prompt/test.csv
+python scripts/upload_dataset.py --train <path_to>/train.csv --test <path_to>/test.csv
 ```
 
 Now that the system is up and running, open a web browser and check out the system outputs for training on uploaded data and for predicting on dummy data:
