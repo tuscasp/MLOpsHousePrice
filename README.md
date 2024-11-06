@@ -1,4 +1,6 @@
-# MLOpsTraining
+# Instructions
+
+On a linux server, run the following commands:
 
 ``` bash
 cd <path_to>/MLOpsTraining/
