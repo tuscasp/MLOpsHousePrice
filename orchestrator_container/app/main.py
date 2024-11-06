@@ -6,15 +6,34 @@ import joblib
 import pandas as pd
 from pathlib import Path
 
+import logging
+import sys
+
+
 app = FastAPI()
 
-dir_dataset = Path('/app/shared_data/dataset/')
-dir_models = Path('/app/shared_data/models/')
+dir_shared = Path('/app/shared_data')
+dir_dataset = dir_shared / 'dataset'
+dir_models = dir_shared / 'models'
+
+logs_path = dir_shared / 'server_logs.log'
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),  # Log to console
+        logging.FileHandler(logs_path)  # Log to a file
+    ]
+)
+
+# Create a custom logger for your application
+logger = logging.getLogger("fastapi_app")
 
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Welcome to Property-Friends Real State"}
 
 @app.post("/uploadtrain/")
 async def upload_file(file: UploadFile = File(...)):
@@ -26,6 +45,8 @@ async def upload_file(file: UploadFile = File(...)):
 
     with path_dest_file.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+
+    logger.info('Train dataset file uploaded')
 
     return {"filename": file.filename, "message": "File uploaded successfully"}
 
@@ -40,6 +61,8 @@ async def upload_file(file: UploadFile = File(...)):
 
     with path_dest_file.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+
+    logger.info('Test dataset file uploaded')
 
     return {"filename": file.filename, "message": "File uploaded successfully"}
 
@@ -68,6 +91,9 @@ async def trainModel():
         data = json.load(json_file)
         model_metrics = data
 
+    logger.info(f'Model trained successfully with output{model_metrics}')
+
+
     return model_metrics
 
 
@@ -92,13 +118,13 @@ async def predict(
     except ValueError:
         return {'Error':'ValueError: some numeric value could not be converted to float'}
 
-    supported_house_types = ["departamento", "casa"]
-    if not (htype in supported_house_types):
-        return {'Error':'ValueError: unkown property type'}
+    # supported_house_types = ["departamento", "casa"]
+    # if not (htype in supported_house_types):
+    #     return {'Error':'ValueError: unkown property type'}
 
-    supported_sectors = ["vitacura", "la reina", "lo barnechea", "providencia", "las condes"]
-    if not (sector in supported_sectors):
-        return {'Error':'ValueError: unkown sector'}
+    # supported_sectors = ["vitacura", "la reina", "lo barnechea", "providencia", "las condes"]
+    # if not (sector in supported_sectors):
+    #     return {'Error':'ValueError: unkown sector'}
 
     # TODO: store columns and supported categorical strings in file during model training
     df = pd.DataFrame(columns=['type', 'sector', 'net_usable_area', 'net_area', 'n_rooms', 'n_bathroom', 'latitude', 'longitude'])
